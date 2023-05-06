@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Проверка ОКТО</string>
+    <string name="text_view">Проверка не запущена</string>
+    <string name="button_on">Запустить проверку</string>
+    <string name="button_off">Прекратить проверку</string>
+    <string name="button_camera">Подключиться к камере</string>
+    <string name="edit_text_ip_camera">Введите адрес камеры</string>
+    <string name="button_main_menu">Главное меню</string>
+    <string name="button_menu_camera">Камера</string>
+</resources>
