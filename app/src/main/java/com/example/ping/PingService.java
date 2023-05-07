@@ -13,21 +13,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.widget.ImageView;
+
 
 import androidx.core.app.NotificationCompat;
 
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.SendResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class PingService extends Service {
 
@@ -37,7 +36,6 @@ public class PingService extends Service {
     public boolean telegramFlag = false;
     public long connectionDropTime = System.currentTimeMillis();
     public long reconnectionTime = System.currentTimeMillis();
-    private long lastNotificationTime = System.currentTimeMillis();
     private NotificationReceiver receiver;
     public NotificationManager notificationManager;
 
@@ -63,7 +61,6 @@ public class PingService extends Service {
             IntentFilter filter = new IntentFilter("com.example.ping.notification");
             registerReceiver(receiver, filter);
             while (!Thread.interrupted() && isRunning) {
-                ImageView imageView = null;
                 try {
                     URL url = new URL("https://app.okto.ru");
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -71,16 +68,22 @@ public class PingService extends Service {
                         urlConnection.setRequestMethod("GET");
                         urlConnection.setConnectTimeout(1000);
                         urlConnection.connect();
-                        isTrueUrl200 = urlConnection.getResponseCode() == 200;
+                        int responseCode = urlConnection.getResponseCode();
+                        if (responseCode == HttpURLConnection.HTTP_OK) {
+                            InputStream inputStream = urlConnection.getInputStream();
+                            isTrueUrl200 = urlConnection.getResponseCode() == 200;
+                            // Обязательное закрытие потока
+                            // Возможные ошибки, если так не делать
+                            // uid=10089(com.example.ping) OkHttp Connecti identical 202 lines
+                            // A connection to https://app.okto.ru/ was leaked. Did you forget to close a response body?
+                            inputStream.close();
+                        }
                     } finally {
+                        // Обязательное закрытие соединения
                         urlConnection.disconnect();
                     }
                     // Пауза 1 секунда
                     Thread.sleep(1000);
-                    // Если прошло менее 5 секунд, то пропускаем уведомление
-                    if (System.currentTimeMillis() - lastNotificationTime < 5000) {
-                        continue;
-                    }
                     // Положительное уведомление
                     if (isTrueUrl200 && telegramFlag) {
                         telegramFlag = false;
@@ -137,7 +140,6 @@ public class PingService extends Service {
                 .setContentIntent(pendingIntent)
                 .setSound(null)
                 .setPriority(NotificationCompat.PRIORITY_LOW);
-        lastNotificationTime = System.currentTimeMillis();
         return builder.build();
     }
 
