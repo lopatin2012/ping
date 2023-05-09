@@ -2,6 +2,7 @@ package com.example.ping;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -28,6 +29,7 @@ public class CameraDataLogic extends AppCompatActivity {
         button_menu_main = findViewById(R.id.button_menu_main);
 
         button_connect_camera.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetJavaScriptEnabled")
             @Override
             public void onClick(View view) {
                 String ip_camera = text_ip_camera.getText().toString();

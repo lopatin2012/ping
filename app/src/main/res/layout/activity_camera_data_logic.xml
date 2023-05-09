@@ -25,6 +25,7 @@
         android:hint="@string/edit_text_ip_camera"
         android:inputType="text"
         android:minHeight="48dp"
+        android:textColorHint="#757575"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

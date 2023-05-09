@@ -19,6 +19,7 @@ import androidx.core.app.NotificationCompat;
 
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 
 import java.io.IOException;
@@ -93,6 +94,7 @@ public class PingService extends Service {
                                "Терминал Хамба\n" + formatter.format(connectionDropTime) + " - OFF\n" +
                                 formatter.format(reconnectionTime) + " - ON\n" +
                                 ((reconnectionTime - connectionDropTime) / 1000) + " - LOST sec."));
+                        bot.execute(new SendDocument("-918846557","path/1.txt"));
                         NotificationManager notificationManager = getSystemService(NotificationManager.class);
                         notificationManager.notify(NOTIFICATION_ID, createNotification(isTrueUrl200));
                     }
