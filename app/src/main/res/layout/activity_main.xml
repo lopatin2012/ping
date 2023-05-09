@@ -13,15 +13,16 @@
         android:layout_height="138dp"
         android:gravity="center"
         android:text="@string/text_view"
-        android:textColor="#000000"
+        android:textColor="@color/black"
         android:textSize="32sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.431" />
+        app:layout_constraintVertical_bias="0.333" />
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="490dp"
         android:layout_height="712dp"
         android:layout_marginBottom="583dp"
@@ -77,6 +78,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="490dp"
         android:layout_height="712dp"
         android:layout_marginStart="48dp"
@@ -108,6 +110,35 @@
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="32dp"
             android:text="@string/button_menu_camera" />
+
+        <Button
+            android:id="@+id/button_menu_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="200dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp"
+            android:text="@string/button_menu_file" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/info_menu_status"
+        android:layout_width="135dp"
+        android:layout_height="59dp"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="86dp"
+        android:layout_marginEnd="156dp"
+        android:layout_marginBottom="54dp"
+        android:gravity="center"
+        android:text="@string/info_menu_status"
+        android:textColor="@color/black"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toTopOf="@+id/resultTextView"
+        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+        app:layout_constraintHorizontal_bias="0.186"
+        app:layout_constraintStart_toEndOf="@+id/linearLayout2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.975" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
