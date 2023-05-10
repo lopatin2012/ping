@@ -24,11 +24,19 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+        <activity
+            android:name=".FileManager"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
 
         <service
             android:name=".PingService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false"
+            android:permission="TODO" />
 
         <activity
             android:name=".MainActivity"

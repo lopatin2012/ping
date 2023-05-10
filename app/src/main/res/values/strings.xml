@@ -7,8 +7,6 @@
     <string name="button_camera">Подключиться к камере</string>
     <string name="edit_text_ip_camera">Введите адрес камеры</string>
     <string name="button_main_menu">Главное меню</string>
-    <string name="info_left_on_main_menu">Проверка сервера</string>
-    <string name="info_right_on_main_menu">Меню</string>
     <string name="button_menu_camera">Камера</string>
     <string name="button_menu_file">Файлы</string>
 

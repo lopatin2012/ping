@@ -10,10 +10,10 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     public TextView resultTextView; // текст сверху
-    public Button button_on, button_off, button_menu_camera; // кнопки старта и остановки пинга
-    public boolean isRunning = false; // флаг цикла
-
-
+    public Button button_on, button_off; // кнопки для контроля доступа к сайту
+    public Button button_menu_camera, button_menu_file; // кнопки для перехода на другие менюшки
+    public boolean isRunning = false; // флаг цикла для пинга
+    public boolean onSaveInstanceState = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
         button_on = findViewById(R.id.button_on);
         button_off = findViewById(R.id.button_off);
         button_menu_camera = findViewById(R.id.button_menu_camera);
+        button_menu_file = findViewById(R.id.button_menu_file);
 
 
         button_on.setOnClickListener(new View.OnClickListener() {
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
                 startForegroundService(check);
                 String userInput = "Проверка запущена";
                 resultTextView.setText(userInput);
+                isRunning = true;
             }
         });
         button_off.setOnClickListener(new View.OnClickListener() {
@@ -50,5 +52,27 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        button_menu_file.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, FileManager.class);
+                startActivity(intent);
+            }
+        });
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isRunning) {
+            onSaveInstanceState = true;
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (onSaveInstanceState) {
+            String userInput = "Проверка запущена";
+            resultTextView.setText(userInput);
+        }
     }
 }
