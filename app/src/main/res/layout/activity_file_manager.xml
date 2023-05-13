@@ -6,13 +6,16 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/button_send_files"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="100dp"
         android:layout_weight="1"
-        android:layout_marginTop="50pt"
-        android:layout_marginStart="100pt"
-        android:layout_marginEnd="100pt"
-        android:text="Button" />
+        android:text="@string/button_send_files"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </LinearLayout>

@@ -9,5 +9,5 @@
     <string name="button_main_menu">Главное меню</string>
     <string name="button_menu_camera">Камера</string>
     <string name="button_menu_file">Файлы</string>
-
+    <string name="button_send_files">Отправить файлы</string>
 </resources>

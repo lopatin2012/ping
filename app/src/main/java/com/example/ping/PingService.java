@@ -1,6 +1,5 @@
 package com.example.ping;
 
-import static androidx.core.app.ActivityCompat.startActivityForResult;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -13,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.util.Log;
 
 
 import androidx.core.app.NotificationCompat;
@@ -28,6 +28,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import okhttp3.ResponseBody;
 
 public class PingService extends Service {
 
@@ -37,6 +41,7 @@ public class PingService extends Service {
     public boolean telegramFlag = false;
     public long connectionDropTime = System.currentTimeMillis();
     public long reconnectionTime = System.currentTimeMillis();
+    private static final String botId = "5999996463:AAFEC5Gs66uypFtDTvuiolo4o7Yizp4UBLo";
     private NotificationReceiver receiver;
     public NotificationManager notificationManager;
 
@@ -55,6 +60,9 @@ public class PingService extends Service {
     @SuppressLint("RtlHardcoded")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Timer timer30minutes = new Timer();
+        // Постановка задачи на отправку сообщения в телеграмм каждые 30 минут для теста
+//        timer30minutes.scheduleAtFixedRate(new LogTask30(),0,30 * 60 * 1000);
         startForeground(NOTIFICATION_ID, createNotification(true));
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
         new Thread(() -> {
@@ -65,60 +73,57 @@ public class PingService extends Service {
                 try {
                     URL url = new URL("https://app.okto.ru");
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    try {
+                    try (InputStream inputStream = urlConnection.getInputStream()) {
+                        // Пауза
+                        Thread.sleep(200);
                         urlConnection.setRequestMethod("GET");
-                        urlConnection.setConnectTimeout(1000);
                         urlConnection.connect();
+                        urlConnection.setConnectTimeout(500);
                         int responseCode = urlConnection.getResponseCode();
-                        if (responseCode == HttpURLConnection.HTTP_OK) {
-                            InputStream inputStream = urlConnection.getInputStream();
-                            isTrueUrl200 = urlConnection.getResponseCode() == 200;
-                            // Обязательное закрытие потока
-                            // Возможные ошибки, если так не делать
-                            // uid=10089(com.example.ping) OkHttp Connecti identical 202 lines
-                            // A connection to https://app.okto.ru/ was leaked. Did you forget to close a response body?
-                            inputStream.close();
-                        }
-                    } finally {
-                        // Обязательное закрытие соединения
                         urlConnection.disconnect();
+                        isTrueUrl200 = responseCode == 200;
+                        // Положительное уведомление
+                        if (isTrueUrl200 && telegramFlag) {
+                            telegramFlag = false;
+                            reconnectionTime = System.currentTimeMillis();
+                            TelegramBot bot = new TelegramBot(botId);
+                            // Основной чат "-918846557"
+                            // Тестовый чат "-994059702"
+                            bot.execute(new SendMessage("-918846557", LocalDate.now() + "\n" +
+                                    "Рабочий ноутбук\n" + formatter.format(connectionDropTime) + " - OFF\n" +
+                                    formatter.format(reconnectionTime) + " - ON\n" +
+                                    ((reconnectionTime - connectionDropTime) / 1000) + " - LOST sec."));
+                            notificationManager.notify(NOTIFICATION_ID, createNotification(isTrueUrl200));
+                        }
+                        // Негативное событие. Любой код, отличный от 200, но не исключение
+                        if (!isTrueUrl200 & !telegramFlag) {
+                            telegramFlag = true;
+                            connectionDropTime = System.currentTimeMillis();
+                        }
                     }
-                    // Пауза 1 секунда
-                    Thread.sleep(1000);
-                    // Положительное уведомление
-                    if (isTrueUrl200 && telegramFlag) {
-                        telegramFlag = false;
-                        reconnectionTime = System.currentTimeMillis();
-                        TelegramBot bot = new TelegramBot("5999996463:AAFEC5Gs66uypFtDTvuiolo4o7Yizp4UBLo");
-                        bot.execute(new SendMessage("-918846557", LocalDate.now() + "\n" +
-                               "Терминал Хамба\n" + formatter.format(connectionDropTime) + " - OFF\n" +
-                                formatter.format(reconnectionTime) + " - ON\n" +
-                                ((reconnectionTime - connectionDropTime) / 1000) + " - LOST sec."));
-                        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-                        notificationManager.notify(NOTIFICATION_ID, createNotification(isTrueUrl200));
-                    }
+                    // Обязательное закрытие соединения
                     //Негативное уведомление
                 } catch (IOException | InterruptedException e) {
-                    NotificationManager notificationManager = getSystemService(NotificationManager.class);
-                    notificationManager.notify(NOTIFICATION_ID, createNotification(false));
-
-                    if (!telegramFlag) {
-                        telegramFlag = true;
-                        connectionDropTime = System.currentTimeMillis();
+                    if (isRunning) {
+                        notificationManager.notify(NOTIFICATION_ID, createNotification(false));
+                        if (!telegramFlag) {
+                            telegramFlag = true;
+                            connectionDropTime = System.currentTimeMillis();
+                        }
+                    } else {
+                        Thread.currentThread().interrupt();
                     }
                 }
             }
             stopForeground(true);
             stopSelf(); // остановка сервиса, вызов onDestroy()
         }).start();
-
         return START_STICKY;
     }
 
 
     @Override
     public IBinder onBind(Intent intent) {
-        // Not used
         return null;
     }
 
@@ -132,7 +137,7 @@ public class PingService extends Service {
         }
 
         // Создаем уведомление
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "ping_channel_id")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "200")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Проверка запущена")
@@ -164,7 +169,6 @@ public class PingService extends Service {
             }
 
             Notification notification = builder.build();
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.notify(NOTIFICATION_ID, notification);
             if (!isServerAvailable) {
                 unregisterReceiver(receiver);
@@ -173,13 +177,25 @@ public class PingService extends Service {
             }
         }
     }
+    // Функция на отправку сообщения в телеграмм каждые 30 минут для теста
+//    private static class LogTask30 extends TimerTask{
+//        @Override
+//        public void run(){
+//         TelegramBot bot = new TelegramBot(botId);
+//            // Основной чат "-918846557"
+//            // Тестовый чат "-994059702"
+//            bot.execute(new SendMessage("-994059702", LocalDate.now() + "\n" +
+//                    "Бот работает"));
+//        }
+//    }
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         if (receiver != null) {
             unregisterReceiver(receiver);
         }
         isRunning = false;
-        super.onDestroy();
+        Thread.currentThread().interrupt();
     }
 }
