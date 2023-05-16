@@ -1,6 +1,7 @@
 package com.example.ping;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -21,6 +22,7 @@ public class CameraDataLogic extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_camera_data_logic);
         // Находим значения
         text_ip_camera = findViewById(R.id.text_ip_camera);
@@ -45,6 +47,7 @@ public class CameraDataLogic extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(CameraDataLogic.this, MainActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }

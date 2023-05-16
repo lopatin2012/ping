@@ -1,18 +1,15 @@
 package com.example.ping;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 11;
     public TextView resultTextView; // текст сверху
     public Button button_on, button_off; // кнопки для контроля доступа к сайту
     public Button button_menu_camera, button_menu_file; // кнопки для перехода на другие менюшки
@@ -28,15 +25,6 @@ public class MainActivity extends AppCompatActivity {
         button_off = findViewById(R.id.button_off);
         button_menu_camera = findViewById(R.id.button_menu_camera);
         button_menu_file = findViewById(R.id.button_menu_file);
-        if (ContextCompat.checkSelfPermission(MainActivity.this,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Запрашиваем разрешение, если оно не было ранее предоставлено.
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 10);
-        }
-
-
         button_on.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, CameraDataLogic.class);
                 startActivity(intent);
+                finish(); // закрытие активити для освобожение ресурсов
             }
         });
         button_menu_file.setOnClickListener(new View.OnClickListener() {
@@ -68,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, FileManager.class);
                 startActivity(intent);
+                finish(); // закрытие активити для освобожение ресурсов
             }
         });
     }

@@ -12,14 +12,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.util.Log;
-
 
 import androidx.core.app.NotificationCompat;
 
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 
 import java.io.IOException;
@@ -30,8 +27,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import okhttp3.ResponseBody;
 
 public class PingService extends Service {
 
@@ -60,7 +55,7 @@ public class PingService extends Service {
     @SuppressLint("RtlHardcoded")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Timer timer30minutes = new Timer();
+//        Timer timer30minutes = new Timer();
         // Постановка задачи на отправку сообщения в телеграмм каждые 30 минут для теста
 //        timer30minutes.scheduleAtFixedRate(new LogTask30(),0,30 * 60 * 1000);
         startForeground(NOTIFICATION_ID, createNotification(true));
@@ -90,7 +85,7 @@ public class PingService extends Service {
                             // Основной чат "-918846557"
                             // Тестовый чат "-994059702"
                             bot.execute(new SendMessage("-918846557", LocalDate.now() + "\n" +
-                                    "Рабочий ноутбук\n" + formatter.format(connectionDropTime) + " - OFF\n" +
+                                    "Терминал Хамба\n" + formatter.format(connectionDropTime) + " - OFF\n" +
                                     formatter.format(reconnectionTime) + " - ON\n" +
                                     ((reconnectionTime - connectionDropTime) / 1000) + " - LOST sec."));
                             notificationManager.notify(NOTIFICATION_ID, createNotification(isTrueUrl200));
@@ -137,7 +132,7 @@ public class PingService extends Service {
         }
 
         // Создаем уведомление
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "200")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "ping_channel_id")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Проверка запущена")
