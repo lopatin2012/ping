@@ -1,7 +1,6 @@
 package com.example.ping;
 
 import android.app.Application;
-import android.content.Context;
 import android.content.SharedPreferences;
 
 public class GlobalVariables extends Application {

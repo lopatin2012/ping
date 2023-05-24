@@ -1,24 +1,18 @@
 package com.example.ping;
 
-import static androidx.fragment.app.FragmentManager.TAG;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.widget.NestedScrollView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.EditText;
 
 public class CameraDataLogic extends AppCompatActivity {
 
     // Объявляем переменные
-    public EditText text_ip_camera;
     public Button button_connect_camera, button_menu_main;
     public WebView web_view_camera;
 
