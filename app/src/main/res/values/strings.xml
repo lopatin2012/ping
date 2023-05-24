@@ -1,13 +1,29 @@
 <resources>
     <string name="app_name">Утилита для Честного Знака</string>
     <string name="info_menu_status">Статус</string>
+    <!--Строка для проверки сервера-->
     <string name="text_view">Проверка не запущена</string>
     <string name="button_on">Запустить проверку</string>
     <string name="button_off">Прекратить проверку</string>
-    <string name="button_camera">Подключиться к камере</string>
-    <string name="edit_text_ip_camera">Введите адрес камеры</string>
+    <!--Строка для перехода между словиями-->
     <string name="button_main_menu">Главное меню</string>
     <string name="button_menu_camera">Камера</string>
+    <!--Строка для меню камеры-->
+    <string name="button_camera">Подключиться к камере</string>
+    <!--Строка для меню файлов -->
     <string name="button_menu_file">Файлы</string>
     <string name="button_send_files">Отправить файлы</string>
+    <string name="button_delete_files">Удалить файлы</string>
+    <!--Строка для меню-триточки-->
+    <string name="settings_action">Настройки</string>
+    <!--Строка для меню настроек-->
+    <string name="settings_text_terminal">Имя терминала</string>
+    <string name="settings_ip_camera_text">Введите ip-адрес камеры</string>
+    <string name="settings_ip_address_camera">ip-адрес камеры</string>
+    <string name="settings_ping_service">Включить проверку во время запуска системы</string>
+    <string name="settings_editText_terminal">Введите имя терминала</string>
+    <string name="settings_flagPing_service">Включить?</string>
+    <string name="settings_button_save">Сохранить</string>
+
+
 </resources>

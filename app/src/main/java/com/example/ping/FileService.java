@@ -12,17 +12,26 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class FileService extends Service {
     private final static String botId = "5999996463:AAFEC5Gs66uypFtDTvuiolo4o7Yizp4UBLo";
-    private final static String botChatId_work = "-918846557";
-    private final static String botChatId_test = "-994059702";
     // Индентификатор уведомления
     private static final int NOTIFICATION_ID = 201;
     // Индентификатор канала уведомления
@@ -53,60 +62,48 @@ public class FileService extends Service {
         notificationManager.createNotificationChannel(channel);
     }
 
-    public File readAndWriteToFile(File sourceFile, File targetFile) {
-        RandomAccessFile file = null;
-        try {
-            file = new RandomAccessFile(sourceFile, "r");
-            long fileLength = file.length();
-            long position = fileLength - 1; // начинаем с конца файла
-            LinkedList<String> list = new LinkedList<>();
-            while (position >= 0 && list.size() < 200000) { // читаем до начала файла или пока список не превысит лимит
-                file.seek(position);
-                char c = (char) file.readByte();
+    public static File readAndWriteToFile(String sourcePath) {
+        File sourceFile = new File(sourcePath);
+        String fileName = sourceFile.getName();
+        File targetFile = new File("/storage/emulated/0/350k_" + fileName); // файл на отправку в телеграмм
 
-                if (c == '\n') { // если нашли символ переноса строки, добавляем строку в список
-                    String line = file.readLine();
-                    list.addFirst(line);
-                }
+        try (BufferedReader reader = Files.newBufferedReader(sourceFile.toPath(), StandardCharsets.UTF_8);
+             BufferedWriter writer = Files.newBufferedWriter(targetFile.toPath(), StandardCharsets.UTF_8)) {
 
-                position--;
+            int linesCount = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                linesCount++;
             }
 
-            StringBuilder sb = new StringBuilder();
-            for (String line : list) {
-                sb.append(line).append("\n");
+            reader.close();
+
+            LinkedList<String> lines = new LinkedList<>();
+            int linesToRead = Math.min(linesCount, 350000);
+            BufferedReader newReader = Files.newBufferedReader(sourceFile.toPath(), StandardCharsets.UTF_8);
+
+            for (int i = 0; i < linesCount - linesToRead; i++) {
+                newReader.readLine();
             }
 
-            BufferedWriter writer = null;
-            try {
-                writer = new BufferedWriter(new FileWriter(targetFile));
-                for (String line : list) {
-                    writer.write(line + "\n");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (writer != null) {
-                    try {
-                        writer.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+            while ((line = newReader.readLine()) != null) {
+                lines.add(line);
             }
+            newReader.close();
+
+            for (String l : lines) {
+                writer.write(l);
+                writer.newLine();
+            }
+            writer.flush();
+
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (file != null) {
-                try {
-                    file.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
+
         return targetFile;
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -118,21 +115,31 @@ public class FileService extends Service {
                 // Основной чат "-918846557"
                 // Тестовый чат "-994059702"
 
+                bot.execute(new SendMessage("-994059702", "Подготовка файлов с терминала"));
                 File file_duplicates = new File("/storage/emulated/0/duplicates.txt");
-                File file_queries = new File("/storage/emulated/0/queries.txt");
+//                File file_queries = new File("/storage/emulated/0/queries.txt");
                 File file_server_codes = new File("/storage/emulated/0/server_codes.txt");
                 File file_videojet_codes = new File("/storage/emulated/0/videojet_codes.txt");
-                File file_videojet_requests = new File("/storage/emulated/0/videojet_requests.txt");
+//                File file_videojet_requests = new File("/storage/emulated/0/videojet_requests.txt");
 
-
-
-                bot.execute(new SendMessage(botChatId_test, "Загрузка файлов с терминала\nЭто займёт некоторое время"));
-
-                bot.execute(new SendDocument(botChatId_test, readAndWriteToFile(file_duplicates, file_duplicates)));
-                bot.execute(new SendDocument(botChatId_test, readAndWriteToFile(file_queries, file_queries)));
-                bot.execute(new SendDocument(botChatId_test, readAndWriteToFile(file_server_codes, file_server_codes)));
-                bot.execute(new SendDocument(botChatId_test, readAndWriteToFile(file_videojet_codes, file_videojet_codes)));
-                bot.execute(new SendDocument(botChatId_test, readAndWriteToFile(file_videojet_requests, file_videojet_requests)));
+                // файл с дублями
+                if (file_duplicates.exists()) {
+                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/duplicates.txt")));
+                }
+//                if (file_queries.exists()) {
+//                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/queries.txt"))); // функция не оптимизирована под этот файл
+//                }
+                // Коды с сервера
+                if (file_server_codes.exists()) {
+                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/server_codes.txt")));
+                }
+                // Коды на принтер
+                if (file_videojet_codes.exists()) {
+                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/videojet_codes.txt")));
+                }
+//                if (file_videojet_requests.exists()) {
+//                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/videojet_requests.txt")));
+//                }
                 stopSelf();
             }
         }).start();

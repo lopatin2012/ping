@@ -1,9 +1,14 @@
 package com.example.ping;
 
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean isRunning = false; // флаг цикла для пинга
     public boolean onSaveInstanceState = false;
 
+
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +67,22 @@ public class MainActivity extends AppCompatActivity {
                 finish(); // закрытие активити для освобожение ресурсов
             }
         });
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        MenuItem buttonSettings = menu.findItem(R.id.button_settings);
+        buttonSettings.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
+                Intent intent = new Intent(MainActivity.this, Settings.class);
+                startActivity(intent);
+                finish();
+                return false;
+            }
+        });
+
+        return true;
     }
     @Override
     protected void onPause() {

@@ -25,8 +25,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class PingService extends Service {
 
@@ -51,6 +53,8 @@ public class PingService extends Service {
         notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
     }
+
+
 
     @SuppressLint("RtlHardcoded")
     @Override
