@@ -34,6 +34,9 @@ public class FileService extends Service {
     private final static String botId = "5999996463:AAFEC5Gs66uypFtDTvuiolo4o7Yizp4UBLo";
     // Индентификатор уведомления
     private static final int NOTIFICATION_ID = 201;
+    // Основной чат "-918846557"
+    // Тестовый чат "-994059702"
+    private final static String chatId = "-918846557";
     // Индентификатор канала уведомления
     private static final String CHANNEL_ID = "Files";
     String folderPath;
@@ -112,10 +115,12 @@ public class FileService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                GlobalVariables globalVariables = (GlobalVariables) getApplicationContext();
+                String terminalName = globalVariables.getNameTerminal();
                 // Основной чат "-918846557"
                 // Тестовый чат "-994059702"
 
-                bot.execute(new SendMessage("-994059702", "Подготовка файлов с терминала"));
+                bot.execute(new SendMessage(chatId, "Подготовка файлов с терминала " + terminalName));
                 File file_duplicates = new File("/storage/emulated/0/duplicates.txt");
 //                File file_queries = new File("/storage/emulated/0/queries.txt");
                 File file_server_codes = new File("/storage/emulated/0/server_codes.txt");
@@ -124,18 +129,18 @@ public class FileService extends Service {
 
                 // файл с дублями
                 if (file_duplicates.exists()) {
-                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/duplicates.txt")));
+                    bot.execute(new SendDocument(chatId, readAndWriteToFile("/storage/emulated/0/duplicates.txt")));
                 }
 //                if (file_queries.exists()) {
 //                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/queries.txt"))); // функция не оптимизирована под этот файл
 //                }
                 // Коды с сервера
                 if (file_server_codes.exists()) {
-                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/server_codes.txt")));
+                    bot.execute(new SendDocument(chatId, readAndWriteToFile("/storage/emulated/0/server_codes.txt")));
                 }
                 // Коды на принтер
                 if (file_videojet_codes.exists()) {
-                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/videojet_codes.txt")));
+                    bot.execute(new SendDocument(chatId, readAndWriteToFile("/storage/emulated/0/videojet_codes.txt")));
                 }
 //                if (file_videojet_requests.exists()) {
 //                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/videojet_requests.txt")));

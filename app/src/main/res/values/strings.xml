@@ -1,25 +1,43 @@
 <resources>
     <string name="app_name">Утилита для Честного Знака</string>
     <string name="info_menu_status">Статус</string>
+    
     <!--Строка для проверки сервера-->
     <string name="text_view">Проверка не запущена</string>
-    <string name="button_on">Запустить проверку</string>
-    <string name="button_off">Прекратить проверку</string>
-    <!--Строка для перехода между словиями-->
+    <string name="button_ping_on">Запустить проверку</string>
+    <string name="button_ping_off">Прекратить проверку</string>
+    
+    <!--Строка для перехода на главный слой-->
     <string name="button_main_menu">Главное меню</string>
-    <string name="button_menu_camera">Камера</string>
-    <!--Строка для меню камеры-->
-    <string name="button_camera">Подключиться к камере</string>
-    <!--Строка для меню файлов -->
+
+    <!--Строки для кнопок в главном меню-->
+    <string name="button_menu_connection_camera">Чтение с камеры</string>
+    <string name="button_menu_camera">Просмотр камеры</string>
     <string name="button_menu_file">Файлы</string>
+    <string name="button_menu_checking_connections">Проверка соединения</string>
+    
+    <!--Строка для меню камеры-->
+    <string name="button_camera_master">Подключиться к камере №1</string>
+    <string name="button_camera_slayer">Подключиться к камере №2</string>
+
+    <!--Строки для чтения содержимого кода -->
+    <string name="button_camera_read_on">Включить чтение кодов</string>
+    <string name="button_camera_read_off">Отключить чтение кодов</string>
+    
+    <!--Строка для меню файлов -->
     <string name="button_send_files">Отправить файлы</string>
     <string name="button_delete_files">Удалить файлы</string>
+    
     <!--Строка для меню-триточки-->
     <string name="settings_action">Настройки</string>
+    
     <!--Строка для меню настроек-->
     <string name="settings_text_terminal">Имя терминала</string>
     <string name="settings_ip_camera_text">Введите ip-адрес камеры</string>
-    <string name="settings_ip_address_camera">ip-адрес камеры</string>
+    <string name="settings_time_ping_text">Пауза между проверками доступа в секундах</string>
+    <string name="settings_time_ping_edit">Введите тайминг проверки сервера</string>
+    <string name="settings_ip_address_camera_master">ip-адрес камеры №1</string>
+    <string name="settings_ip_address_camera_slayer">ip-адрес камеры №2</string>
     <string name="settings_ping_service">Включить проверку во время запуска системы</string>
     <string name="settings_editText_terminal">Введите имя терминала</string>
     <string name="settings_flagPing_service">Включить?</string>

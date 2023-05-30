@@ -14,8 +14,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/terminal_name_text"
@@ -40,17 +39,59 @@
                 tools:ignore="MissingConstraints" />
 
             <TextView
-                android:id="@+id/ip_camera_text"
+                android:id="@+id/time_ping_text"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/settings_time_ping_text"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                tools:ignore="MissingConstraints" />
+
+            <EditText
+                android:id="@+id/time_ping_edit"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="16dp"
+                android:autofillHints="name"
+                android:gravity="center"
+                android:hint="@string/settings_time_ping_edit"
+                android:inputType="number"
+                tools:ignore="MissingConstraints" />
+
+            <TextView
+                android:id="@+id/ip_camera_text_master"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:gravity="center"
-                android:text="@string/settings_ip_address_camera"
+                android:text="@string/settings_ip_address_camera_master"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 tools:ignore="MissingConstraints" />
 
             <EditText
-                android:id="@+id/ip_camera_edit"
+                android:id="@+id/ip_camera_edit_master"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:autofillHints=""
+                android:gravity="center"
+                android:hint="@string/settings_ip_camera_text"
+                android:textSize="16sp"
+                tools:ignore="LabelFor,MissingConstraints,TextFields" />
+
+            <TextView
+                android:id="@+id/ip_camera_text_slayer"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="@string/settings_ip_address_camera_slayer"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                tools:ignore="MissingConstraints" />
+
+            <EditText
+                android:id="@+id/ip_camera_edit_slayer"
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
                 android:autofillHints=""

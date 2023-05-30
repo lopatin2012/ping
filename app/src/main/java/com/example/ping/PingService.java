@@ -1,6 +1,8 @@
 package com.example.ping;
 
 
+import static androidx.fragment.app.FragmentManager.TAG;
+
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -12,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -22,23 +25,23 @@ import com.pengrad.telegrambot.request.SendMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 public class PingService extends Service {
 
     private static final int NOTIFICATION_ID = 200;
-    public boolean isTrueUrl200 = false;
+    public String errorMessage = "Красный экран";
     public volatile boolean isRunning = true;
     public boolean telegramFlag = false;
     public long connectionDropTime = System.currentTimeMillis();
     public long reconnectionTime = System.currentTimeMillis();
     private static final String botId = "5999996463:AAFEC5Gs66uypFtDTvuiolo4o7Yizp4UBLo";
+    // Основной чат "-918846557"
+    // Тестовый чат "-994059702"
+    public final static String chatId = "-918846557";
     private NotificationReceiver receiver;
     public NotificationManager notificationManager;
 
@@ -56,76 +59,135 @@ public class PingService extends Service {
 
 
 
-    @SuppressLint("RtlHardcoded")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//        Timer timer30minutes = new Timer();
-        // Постановка задачи на отправку сообщения в телеграмм каждые 30 минут для теста
-//        timer30minutes.scheduleAtFixedRate(new LogTask30(),0,30 * 60 * 1000);
+        GlobalVariables globalVariables = (GlobalVariables) getApplicationContext();
+        int time_ping = globalVariables.getTimePing() * 1000;
         startForeground(NOTIFICATION_ID, createNotification(true));
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
         new Thread(() -> {
             receiver = new NotificationReceiver();
             IntentFilter filter = new IntentFilter("com.example.ping.notification");
             registerReceiver(receiver, filter);
-            while (!Thread.interrupted() && isRunning) {
-                try {
-                    URL url = new URL("https://app.okto.ru");
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    try (InputStream inputStream = urlConnection.getInputStream()) {
-                        // Пауза
-                        Thread.sleep(200);
+            try {
+                while (!Thread.interrupted() && isRunning) {
+                    Thread.sleep(time_ping);
+                    try {
+                        // https://www.gosuslugi.ru
+                        // https://app.okto.ru/users/sign_in
+                        URL url = new URL("https://app.okto.ru/users/sign_in");
+                        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+                        // Установка таймаутов соединения и чтение
+                        urlConnection.setConnectTimeout(time_ping);
                         urlConnection.setRequestMethod("GET");
                         urlConnection.connect();
-                        urlConnection.setConnectTimeout(500);
+
                         int responseCode = urlConnection.getResponseCode();
+//                        Log.e(TAG, String.valueOf(responseCode));
+
+                        try (InputStream ignored = urlConnection.getInputStream()) {
+                            // чтение данных из потока inputStream
+                        } catch (IOException e) {
+                            // обработка ошибки
+                        }
+
                         urlConnection.disconnect();
-                        isTrueUrl200 = responseCode == 200;
-                        // Положительное уведомление
-                        if (isTrueUrl200 && telegramFlag) {
-                            telegramFlag = false;
-                            reconnectionTime = System.currentTimeMillis();
-                            TelegramBot bot = new TelegramBot(botId);
-                            // Основной чат "-918846557"
-                            // Тестовый чат "-994059702"
-                            bot.execute(new SendMessage("-918846557", LocalDate.now() + "\n" +
-                                    "Терминал Хамба\n" + formatter.format(connectionDropTime) + " - OFF\n" +
-                                    formatter.format(reconnectionTime) + " - ON\n" +
-                                    ((reconnectionTime - connectionDropTime) / 1000) + " - LOST sec."));
-                            notificationManager.notify(NOTIFICATION_ID, createNotification(isTrueUrl200));
+
+                        switch (responseCode) {
+                            case 200:
+                                // Соединение успешно установлено
+                                if (telegramFlag) {
+                                    telegramFlag = false;
+                                    reconnectionTime = System.currentTimeMillis();
+                                    sendTelegramMessage(formatter);
+                                    notificationManager.notify(NOTIFICATION_ID, createNotification(true));
+                                }
+                                break;
+                            case 404:
+                                // Обработка ошибки страница не найдена
+                                handleNotFoundException();
+                                break;
+                            case 500:
+                                // Обработка ошибки прокси-сервера
+                                break;
+                            default:
+                                // Любой другой код ошибки
+                                handleOtherErrors();
+                                errorMessage = "Ошибка " + responseCode;
+                                break;
                         }
-                        // Негативное событие. Любой код, отличный от 200, но не исключение
-                        if (!isTrueUrl200 & !telegramFlag) {
-                            telegramFlag = true;
-                            connectionDropTime = System.currentTimeMillis();
-                        }
-                    }
-                    // Обязательное закрытие соединения
-                    //Негативное уведомление
-                } catch (IOException | InterruptedException e) {
-                    if (isRunning) {
-                        notificationManager.notify(NOTIFICATION_ID, createNotification(false));
-                        if (!telegramFlag) {
-                            telegramFlag = true;
-                            connectionDropTime = System.currentTimeMillis();
-                        }
-                    } else {
-                        Thread.currentThread().interrupt();
+                    } catch (SocketTimeoutException e) {
+                        // Соединение не было установлено за отведённое время
+                        handleConnectionTimeout();
+                    } catch (IOException e) {
+                        // Общая обработка ошибок ввода-вывода
+                        handleIOException();
                     }
                 }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
+            // Завершение работы сервиса
             stopForeground(true);
             stopSelf(); // остановка сервиса, вызов onDestroy()
         }).start();
         return START_STICKY;
     }
 
-
+    private void sendTelegramMessage(SimpleDateFormat formatter) {
+        TelegramBot bot = new TelegramBot(botId);
+        GlobalVariables globalVariables = (GlobalVariables) getApplicationContext();
+        String terminalName = globalVariables.getNameTerminal();
+        String message = LocalDate.now() + "\n" +
+                "Терминал " + terminalName +  "\n" +
+                errorMessage + "\n" +
+                formatter.format(connectionDropTime) + " - OFF\n" +
+                formatter.format(reconnectionTime) + " - ON\n" +
+                ((reconnectionTime - connectionDropTime) / 1000) + " - LOST sec.";
+        bot.execute(new SendMessage(chatId, message));
+        globalVariables.setTextPing(message);
+    }
+    // Не удалось установить связь с сервером за 1 секунду
+    private void handleConnectionTimeout() {
+        if (!telegramFlag) {
+            telegramFlag = true;
+            errorMessage = "Ошибка TimeOut";
+            connectionDropTime = System.currentTimeMillis();
+            notificationManager.notify(NOTIFICATION_ID, createNotification(false));
+        }
+    }
+    // Отсутствовал Интернет
+    private void handleIOException() {
+        if (!telegramFlag) {
+            telegramFlag = true;
+            errorMessage = "Отсуствовал Интернет";
+            connectionDropTime = System.currentTimeMillis();
+            notificationManager.notify(NOTIFICATION_ID, createNotification(false));
+        }
+    }
+    // Страница 404
+    private void handleNotFoundException() {
+        if (!telegramFlag) {
+            telegramFlag = true;
+            errorMessage = "Страница не найдена";
+            connectionDropTime = System.currentTimeMillis();
+            notificationManager.notify(NOTIFICATION_ID, createNotification(false));
+        }
+    }
+    // Необработанный ответ сервера
+    private void handleOtherErrors() {
+        if (!telegramFlag) {
+            telegramFlag = true;
+            errorMessage = "Необработанный ответ сервера";
+            connectionDropTime = System.currentTimeMillis();
+            notificationManager.notify(NOTIFICATION_ID, createNotification(false));
+        }
+    }
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
     private Notification createNotification(boolean isServerAvailable) {
         // Запускаем MainActivity при нажатии на уведомление
         Intent notificationIntent = new Intent(this, MainActivity.class);
@@ -134,7 +196,6 @@ public class PingService extends Service {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_MUTABLE);
         }
-
         // Создаем уведомление
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "ping_channel_id")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -147,7 +208,6 @@ public class PingService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_LOW);
         return builder.build();
     }
-
     private class NotificationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -176,18 +236,6 @@ public class PingService extends Service {
             }
         }
     }
-    // Функция на отправку сообщения в телеграмм каждые 30 минут для теста
-//    private static class LogTask30 extends TimerTask{
-//        @Override
-//        public void run(){
-//         TelegramBot bot = new TelegramBot(botId);
-//            // Основной чат "-918846557"
-//            // Тестовый чат "-994059702"
-//            bot.execute(new SendMessage("-994059702", LocalDate.now() + "\n" +
-//                    "Бот работает"));
-//        }
-//    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
