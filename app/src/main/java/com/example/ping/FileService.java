@@ -120,7 +120,7 @@ public class FileService extends Service {
                     bot.execute(new SendDocument(chatId, readAndWriteToFile("/storage/emulated/0/duplicates.txt")));
                 }
 //                if (file_queries.exists()) {
-//                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/queries.txt"))); // функция не оптимизирована под этот файл
+//                    bot.execute(new SendDocument("", readAndWriteToFile("/storage/emulated/0/queries.txt"))); // функция не оптимизирована под этот файл
 //                }
                 // Коды с сервера
                 if (file_server_codes.exists()) {
