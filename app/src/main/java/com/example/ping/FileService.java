@@ -1,6 +1,5 @@
 package com.example.ping;
 
-import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -16,21 +15,10 @@ import com.pengrad.telegrambot.request.SendMessage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class FileService extends Service {
     // Используйте здесь id своего бота
@@ -143,7 +131,7 @@ public class FileService extends Service {
                     bot.execute(new SendDocument(chatId, readAndWriteToFile("/storage/emulated/0/videojet_codes.txt")));
                 }
 //                if (file_videojet_requests.exists()) {
-//                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/videojet_requests.txt")));
+//                    bot.execute(new SendDocument("", readAndWriteToFile("/storage/emulated/0/videojet_requests.txt")));
 //                }
                 stopSelf();
             }
