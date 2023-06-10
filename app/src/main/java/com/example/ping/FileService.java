@@ -119,8 +119,6 @@ public class FileService extends Service {
             public void run() {
                 GlobalVariables globalVariables = (GlobalVariables) getApplicationContext();
                 String terminalName = globalVariables.getNameTerminal();
-                // Основной чат "-918846557"
-                // Тестовый чат "-994059702"
 
                 bot.execute(new SendMessage(chatId, "Подготовка файлов с терминала " + terminalName));
                 File file_duplicates = new File("/storage/emulated/0/duplicates.txt");
