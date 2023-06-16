@@ -19,6 +19,11 @@ public class GlobalVariables extends Application {
         editor = sharedPreferences.edit();
     }
 
+    // Используйте свой id для бота
+    public String getBotId() {return sharedPreferences.getString("id_bot", "");}
+    // Используйте свой id чата
+    public String getBotChat() {return sharedPreferences.getString("bot_chat", "");}
+
     public void setNameTerminal(String nameTerminal) {
         editor.putString("name_terminal", nameTerminal);
         editor.apply();
@@ -61,7 +66,7 @@ public class GlobalVariables extends Application {
     }
 
     public int getTimePing() {
-        return sharedPreferences.getInt("time_ping", 5);
+        return sharedPreferences.getInt("time_ping", 30);
     }
 
     public void setTextPing(String textPing) {

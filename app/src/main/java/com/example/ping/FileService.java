@@ -15,28 +15,14 @@ import com.pengrad.telegrambot.request.SendMessage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class FileService extends Service {
-    private final static String botId = "5999996463:AAFEC5Gs66uypFtDTvuiolo4o7Yizp4UBLo";
     // Индентификатор уведомления
     private static final int NOTIFICATION_ID = 201;
-    // Основной чат "-918846557"
-    // Тестовый чат "-994059702"
-    private final static String chatId = "-918846557";
     // Индентификатор канала уведомления
     private static final String CHANNEL_ID = "Files";
     String folderPath;
@@ -110,6 +96,11 @@ public class FileService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Получение id чата и бота
+        GlobalVariables globalVariables = (GlobalVariables) getApplicationContext();
+        String botId = globalVariables.getBotId();
+        String chatId = globalVariables.getBotChat();
+
         TelegramBot bot = new TelegramBot(botId);
         startForeground(NOTIFICATION_ID, builder.build());
         new Thread(new Runnable() {
@@ -117,8 +108,6 @@ public class FileService extends Service {
             public void run() {
                 GlobalVariables globalVariables = (GlobalVariables) getApplicationContext();
                 String terminalName = globalVariables.getNameTerminal();
-                // Основной чат "-918846557"
-                // Тестовый чат "-994059702"
 
                 bot.execute(new SendMessage(chatId, "Подготовка файлов с терминала " + terminalName));
                 File file_duplicates = new File("/storage/emulated/0/duplicates.txt");
@@ -132,7 +121,7 @@ public class FileService extends Service {
                     bot.execute(new SendDocument(chatId, readAndWriteToFile("/storage/emulated/0/duplicates.txt")));
                 }
 //                if (file_queries.exists()) {
-//                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/queries.txt"))); // функция не оптимизирована под этот файл
+//                    bot.execute(new SendDocument("", readAndWriteToFile("/storage/emulated/0/queries.txt"))); // функция не оптимизирована под этот файл
 //                }
                 // Коды с сервера
                 if (file_server_codes.exists()) {
@@ -143,7 +132,7 @@ public class FileService extends Service {
                     bot.execute(new SendDocument(chatId, readAndWriteToFile("/storage/emulated/0/videojet_codes.txt")));
                 }
 //                if (file_videojet_requests.exists()) {
-//                    bot.execute(new SendDocument("-994059702", readAndWriteToFile("/storage/emulated/0/videojet_requests.txt")));
+//                    bot.execute(new SendDocument("", readAndWriteToFile("/storage/emulated/0/videojet_requests.txt")));
 //                }
                 stopSelf();
             }

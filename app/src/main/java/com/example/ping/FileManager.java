@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,8 +31,6 @@ public class FileManager extends AppCompatActivity {
             System.out.println("Не удалось удалить папку " + folder.getAbsolutePath());
         }
     }
-
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceSaved) {
         super.onCreate(savedInstanceSaved);

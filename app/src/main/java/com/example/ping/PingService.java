@@ -29,19 +29,18 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class PingService extends Service {
-
     private static final int NOTIFICATION_ID = 200;
     public String errorMessage = "Красный экран";
     public volatile boolean isRunning = true;
     public boolean telegramFlag = false;
     public long connectionDropTime = System.currentTimeMillis();
     public long reconnectionTime = System.currentTimeMillis();
-    private static final String botId = "5999996463:AAFEC5Gs66uypFtDTvuiolo4o7Yizp4UBLo";
-    // Основной чат "-918846557"
-    // Тестовый чат "-994059702"
-    public final static String chatId = "-918846557";
+    // https://www.gosuslugi.ru
+    // http://app.okto.ru/users/sign_in
+    private final static String urlOkto = "http://app.okto.ru/users/sign_in";
     private NotificationReceiver receiver;
     public NotificationManager notificationManager;
 
@@ -56,13 +55,11 @@ public class PingService extends Service {
         notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
     }
-
-
-
+    @SuppressLint("RestrictedApi")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         GlobalVariables globalVariables = (GlobalVariables) getApplicationContext();
-        int time_ping = globalVariables.getTimePing() * 1000;
+        int time_filter = globalVariables.getTimePing();
         startForeground(NOTIFICATION_ID, createNotification(true));
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
         new Thread(() -> {
@@ -71,15 +68,14 @@ public class PingService extends Service {
             registerReceiver(receiver, filter);
             try {
                 while (!Thread.interrupted() && isRunning) {
-                    Thread.sleep(time_ping);
+                    Thread.sleep(1000);
                     try {
-                        // https://www.gosuslugi.ru
-                        // https://app.okto.ru/users/sign_in
-                        URL url = new URL("https://app.okto.ru/users/sign_in");
+                        URL url = new URL(urlOkto);
                         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
                         // Установка таймаутов соединения и чтение
-                        urlConnection.setConnectTimeout(time_ping);
+                        // 1000 миллисекунд
+                        urlConnection.setConnectTimeout(1000);
                         urlConnection.setRequestMethod("GET");
                         urlConnection.connect();
 
@@ -87,35 +83,32 @@ public class PingService extends Service {
 //                        Log.e(TAG, String.valueOf(responseCode));
 
                         try (InputStream ignored = urlConnection.getInputStream()) {
-                            // чтение данных из потока inputStream
+                            urlConnection.disconnect();
                         } catch (IOException e) {
-                            // обработка ошибки
+                            urlConnection.disconnect();
                         }
-
-                        urlConnection.disconnect();
-
                         switch (responseCode) {
-                            case 200:
+                            case 200 -> {
                                 // Соединение успешно установлено
-                                if (telegramFlag) {
-                                    telegramFlag = false;
+                                if (telegramFlag & ((System.currentTimeMillis() - connectionDropTime) / 1000) > time_filter) {
                                     reconnectionTime = System.currentTimeMillis();
+                                    telegramFlag = false;
                                     sendTelegramMessage(formatter);
                                     notificationManager.notify(NOTIFICATION_ID, createNotification(true));
                                 }
-                                break;
-                            case 404:
+                                if (telegramFlag & ((System.currentTimeMillis() - connectionDropTime) / 1000) < time_filter) {
+                                    telegramFlag = false;
+                                    notificationManager.notify(NOTIFICATION_ID, createNotification(true));
+                                }
+                            }
+                            case 404 ->
                                 // Обработка ошибки страница не найдена
-                                handleNotFoundException();
-                                break;
-                            case 500:
-                                // Обработка ошибки прокси-сервера
-                                break;
-                            default:
+                                    handleNotFoundException();
+                            default -> {
                                 // Любой другой код ошибки
                                 handleOtherErrors();
                                 errorMessage = "Ошибка " + responseCode;
-                                break;
+                            }
                         }
                     } catch (SocketTimeoutException e) {
                         // Соединение не было установлено за отведённое время
@@ -136,10 +129,12 @@ public class PingService extends Service {
     }
 
     private void sendTelegramMessage(SimpleDateFormat formatter) {
-        TelegramBot bot = new TelegramBot(botId);
         GlobalVariables globalVariables = (GlobalVariables) getApplicationContext();
+        String botId = globalVariables.getBotId();
+        String chatId = globalVariables.getBotChat();
         String terminalName = globalVariables.getNameTerminal();
-        String message = LocalDate.now() + "\n" +
+        TelegramBot bot = new TelegramBot(botId);
+        String message = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
                 "Терминал " + terminalName +  "\n" +
                 errorMessage + "\n" +
                 formatter.format(connectionDropTime) + " - OFF\n" +
@@ -198,7 +193,7 @@ public class PingService extends Service {
         }
         // Создаем уведомление
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "ping_channel_id")
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(isServerAvailable ? R.drawable.ping_on : R.drawable.ping_off)
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Проверка запущена")
                 .setContentText(isServerAvailable ? "Сервер доступен" : "Сервер недоступен")
@@ -214,18 +209,13 @@ public class PingService extends Service {
             boolean isServerAvailable = intent.getBooleanExtra("isServerAvailable", false);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "ping_channel_id")
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setSmallIcon(isServerAvailable ? R.drawable.ping_on : R.drawable.ping_off)
                     .setWhen(System.currentTimeMillis())
                     .setContentTitle("Проверка запущена")
                     .setContentText(isServerAvailable ? "Сервер доступен" : "Сервер недоступен")
                     .setTicker(isServerAvailable ? "Сервер доступен" : "Сервер недоступен")
                     .setSound(null)
                     .setPriority(NotificationCompat.PRIORITY_LOW);
-
-            if (!isRunning) {
-                builder.setContentText("Сервер недоступен");
-                builder.setTicker("Сервер недоступен");
-            }
 
             Notification notification = builder.build();
             notificationManager.notify(NOTIFICATION_ID, notification);
@@ -243,6 +233,5 @@ public class PingService extends Service {
             unregisterReceiver(receiver);
         }
         isRunning = false;
-        Thread.currentThread().interrupt();
     }
 }

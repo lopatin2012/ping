@@ -34,8 +34,8 @@
     <!--Строка для меню настроек-->
     <string name="settings_text_terminal">Имя терминала</string>
     <string name="settings_ip_camera_text">Введите ip-адрес камеры</string>
-    <string name="settings_time_ping_text">Пауза между проверками доступа в секундах</string>
-    <string name="settings_time_ping_edit">Введите тайминг проверки сервера</string>
+    <string name="settings_time_ping_text">Отправка отчёта, если время более ></string>
+    <string name="settings_time_ping_edit">Введите секунды</string>
     <string name="settings_ip_address_camera_master">ip-адрес камеры №1</string>
     <string name="settings_ip_address_camera_slayer">ip-адрес камеры №2</string>
     <string name="settings_ping_service">Включить проверку во время запуска системы</string>

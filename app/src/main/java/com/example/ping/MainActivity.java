@@ -4,23 +4,17 @@ package com.example.ping;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 11;
-    public TextView resultTextView; // текст сверху
     public
     Button button_menu_camera, button_menu_file,
             button_menu_ping, button_menu_barcode_reading; // кнопки для перехода на другие менюшки
-    public boolean isRunning = false; // флаг цикла для пинга
-    public boolean onSaveInstanceState = false;
 
 
     @Override
